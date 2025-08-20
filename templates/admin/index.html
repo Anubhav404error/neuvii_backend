@@ -1,0 +1,240 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <style>
+        /* Custom CSS for Neuvii Admin Sidebar Structure */
+        
+        /* Ensure proper spacing and alignment for management sections */
+        .module h2 {
+            background: linear-gradient(to bottom, #4a90a4 0%, #417690 100%);
+            color: #fff;
+            padding: 10px 15px;
+            margin: 0;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #2e5d6e;
+        }
+
+        /* Style for individual model links */
+        .module table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+        }
+
+        .module table tr {
+            border-bottom: 1px solid #e1e1e1;
+        }
+
+        .module table tr:last-child {
+            border-bottom: none;
+        }
+
+        .module table td {
+            padding: 10px 15px;
+            border: none;
+            vertical-align: middle;
+        }
+
+        .module table td a {
+            color: #447e9b;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 13px;
+        }
+
+        .module table td a:hover {
+            color: #205067;
+            text-decoration: underline;
+        }
+
+        /* Ensure consistent spacing between management sections */
+        .module {
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* Style for action links (Add, Change, View) */
+        .addlink, .changelink, .viewlink {
+            padding-left: 16px;
+            background-repeat: no-repeat;
+            background-position: 0 center;
+            font-size: 11px;
+            font-weight: normal;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-right: 8px;
+        }
+
+        .addlink {
+            background-image: url("{% static 'admin/img/icon-addlink.svg' %}");
+        }
+
+        .changelink {
+            background-image: url("{% static 'admin/img/icon-changelink.svg' %}");
+        }
+
+        .viewlink {
+            background-image: url("{% static 'admin/img/icon-changelink.svg' %}");
+        }
+
+        /* Clean hierarchy for nested items */
+        .module table tr td:first-child {
+            padding-left: 20px;
+            font-weight: 600;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1024px) {
+            .module h2 {
+                font-size: 12px;
+                padding: 8px 12px;
+            }
+            
+            .module table td {
+                padding: 8px 12px;
+            }
+        }
+
+        /* Dashboard stats styling */
+        .dashboard-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 20px;
+            flex: 1;
+            min-width: 200px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 {
+            margin: 0 0 10px 0;
+            color: #417690;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card .number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* Welcome message styling */
+        .welcome-message {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 30px;
+        }
+
+        .welcome-message h2 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+        }
+
+        .welcome-message p {
+            margin: 0;
+            opacity: 0.9;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    {% if user.role %}
+        <div class="welcome-message">
+            <h2>{{ subtitle|default:"Administration Dashboard" }}</h2>
+            <p>Welcome back, {{ user.get_full_name|default:user.email }}! You are logged in as {{ user.role.name }}.</p>
+        </div>
+
+        {% if user.role.name == "Neuvii Admin" %}
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <h3>Total Clinics</h3>
+                    <div class="number">{{ total_clinics|default:0 }}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Active Clinics</h3>
+                    <div class="number">{{ active_clinics|default:0 }}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Therapists</h3>
+                    <div class="number">{{ total_therapists|default:0 }}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Clients</h3>
+                    <div class="number">{{ total_clients|default:0 }}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Children</h3>
+                    <div class="number">{{ total_children|default:0 }}</div>
+                </div>
+            </div>
+        {% elif user.role.name == "Clinic Admin" %}
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <h3>Clinic</h3>
+                    <div class="number">{{ clinic_name|default:"N/A" }}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Therapists</h3>
+                    <div class="number">{{ clinic_therapists|default:0 }}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Children</h3>
+                    <div class="number">{{ clinic_children|default:0 }}</div>
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+
+    {% if app_list %}
+        {% for app in app_list %}
+            <div class="module">
+                <h2>{{ app.name }}</h2>
+                {% if app.models %}
+                    <table>
+                        {% for model in app.models %}
+                            <tr>
+                                <td>
+                                    <a href="{{ model.admin_url }}">{{ model.name }}</a>
+                                </td>
+                                <td>
+                                    {% if model.perms.add %}
+                                        <a href="{{ model.add_url }}" class="addlink">Add</a>
+                                    {% endif %}
+                                    {% if model.perms.change %}
+                                        <a href="{{ model.admin_url }}" class="changelink">Change</a>
+                                    {% endif %}
+                                    {% if model.perms.view %}
+                                        <a href="{{ model.admin_url }}" class="viewlink">View</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>{% trans "You don't have permission to view or edit anything." %}</p>
+    {% endif %}
+</div>
+{% endblock %}
